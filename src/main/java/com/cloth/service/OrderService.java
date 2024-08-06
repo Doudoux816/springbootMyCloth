@@ -56,26 +56,19 @@ public class OrderService {
     @Transactional
     public void createOrder(String json) {
         JSONObject obj = new JSONObject(json);
-        
+
         JSONObject orderJson = obj.getJSONObject("order");
 
         Integer userinteger = orderJson.getInt("userId");
-        
-        Optional<Users>optional = usersRepository.findById(userinteger);
-        Users user =optional.get();
-//        Integer userId = orderJson.isNull("userId") ? null : orderJson.getInt("userId");
+        Optional<Users> optional = usersRepository.findById(userinteger);
+        Users user = optional.orElseThrow(() -> new RuntimeException("User not found"));
+
         String recipientName = orderJson.isNull("recipientName") ? null : orderJson.getString("recipientName");
         String recipientPhone = orderJson.isNull("recipientPhone") ? null : orderJson.getString("recipientPhone");
         String shippingMethod = orderJson.isNull("shippingMethod") ? null : orderJson.getString("shippingMethod");
         String address = orderJson.isNull("address") ? null : orderJson.getString("address");
         String paymentMethod = orderJson.isNull("paymentMethod") ? null : orderJson.getString("paymentMethod");
         String totalAmount = orderJson.isNull("totalAmount") ? null : orderJson.getString("totalAmount");
-
-        Integer couponId =  orderJson.getInt("coupon");
-        
-        Optional<Couponowner>optionall = couponownerRepository.findById(couponId);
-        Couponowner couponowner =optionall.get();
-    
 
         Orders order = new Orders();
         order.setUsers(user);
@@ -85,8 +78,17 @@ public class OrderService {
         order.setShipaddress(address);
         order.setPayment(paymentMethod);
         order.setTotalAmount(totalAmount);
-        order.setCouponowner(couponowner);
         order.setStatus("未出貨");
+
+        if (!orderJson.isNull("coupon")) {
+            Integer couponId = orderJson.getInt("coupon");
+            Optional<Couponowner> optionalCoupon = couponownerRepository.findById(couponId);
+            Couponowner couponowner = optionalCoupon.orElseThrow(() -> new RuntimeException("Coupon not found"));
+            order.setCouponowner(couponowner);
+        } else {
+            order.setCouponowner(null);
+        }
+
         Orders savedOrder = ordersRepository.save(order);
 
         String ordernum = generateOrderNum(savedOrder.getId());
@@ -94,22 +96,19 @@ public class OrderService {
         ordersRepository.save(savedOrder);
 
         JSONArray orderDetailsJson = obj.getJSONArray("orderDetails");
-        
-        
+
         for (int i = 0; i < orderDetailsJson.length(); i++) {
             JSONObject detailJson = orderDetailsJson.getJSONObject(i);
-            Integer cartId =  detailJson.getInt("cartId");
-		        Optional<Cart>optionalll = cartRepository.findById(cartId);
-		        Cart cart =optionalll.get();
-          Orderdetail orderDetail = new Orderdetail();
+            Integer cartId = detailJson.getInt("cartId");
+            Optional<Cart> optionalCart = cartRepository.findById(cartId);
+            Cart cart = optionalCart.orElseThrow(() -> new RuntimeException("Cart not found"));
+
+            Orderdetail orderDetail = new Orderdetail();
             orderDetail.setOrders(savedOrder);
-	        orderDetail.setCart(cart);   
-	        
-	        orderDetailRepository.save(orderDetail);
+            orderDetail.setCart(cart);
+
+            orderDetailRepository.save(orderDetail);
         }
-        
-        
-             
     }
     @Transactional
     private String generateOrderNum(Integer orderId) {

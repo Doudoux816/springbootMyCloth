@@ -92,19 +92,18 @@ public class UsersService {
 		return usersRepository.findByEmail(email).isPresent();
 	}
 
-	// 註冊============================================================================================
+// 註冊============================================================================================
 	public void registerUser(String email, String username, String password, String gender, String birth, String phone,
 	        String address, byte[] filess) {
 	    Users user = new Users();
-	    user.setEmail(email); // 設置電子郵件
+	    user.setEmail(email);       // 設置電子郵件
 	    user.setUsername(username); // 設置用戶名
 	    user.setPassword(password); // 設置密碼
-	    user.setGender(gender); // 設置性別
-	    user.setBirth(birth); // 設置生日
-	    user.setPhone(phone); // 設置電話
-	    user.setAddress(address); // 設置地址
-	    user.setImg(filess); // 設置照片
-
+	    user.setGender(gender);     // 設置性別
+	    user.setBirth(birth);       // 設置生日
+	    user.setPhone(phone);       // 設置電話
+	    user.setAddress(address);   // 設置地址
+	    user.setImg(filess);        // 設置照片
 	    usersRepository.save(user); // 儲存使用者到數據庫
 	}
 

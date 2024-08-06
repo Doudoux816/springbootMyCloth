@@ -20,7 +20,3 @@ public interface UsersRepository extends JpaRepository<Users, Integer> {
     Optional<Users> findByEmail(@Param("email") String email);
     
 }
-
-
-
-

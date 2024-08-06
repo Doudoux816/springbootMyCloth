@@ -102,30 +102,27 @@ public class UsersController {
 
 
 // 顯示用戶大頭照‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵
-    private byte[] img = null;      // 用於存儲默認的圖片數據
-    @GetMapping(                    // GET 請求處理方法，根據用戶的電子郵件返回圖片
+    private byte[] img = null;
+    @GetMapping(
     	    path = "/detail/{email}",
     	    produces = {MediaType.IMAGE_JPEG_VALUE, MediaType.IMAGE_PNG_VALUE}
     	)
     	public ResponseEntity<byte[]> findPhotoByPhotoId(@PathVariable(name = "email") String email) {
-    		// 根據電子郵件查找用戶詳情
     	    Users detail = usersService.findByEmail(email);
-    	    // 如果用戶存在且圖片不為空，返回用戶的圖片；否則返回默認圖片
     	    byte[] result = (detail != null && detail.getImg() != null) ? detail.getImg() : this.img;
-    	    // 設置 HTTP 響應頭，指定內容類型為 JPEG 圖片
+
     	    HttpHeaders headers = new HttpHeaders();
     	    headers.setContentType(MediaType.IMAGE_JPEG); // 可以根據實際情況設置為 PNG 或其他格式
-    	    // 返回包含圖片數據和 HTTP 響應頭的 ResponseEntity，狀態碼為 200 OK
+
     	    return new ResponseEntity<>(result, headers, HttpStatus.OK);
     	}
 
   
 // 傳送驗證碼到顧客email ‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵‵
-    	// 發送電子郵件的方法
-    	public String sendEmail(@RequestParam String to, @RequestParam String subject,
+    public String sendEmail(@RequestParam String to, @RequestParam String subject,
     		                @RequestParam String text) {
-        emailService.sendEmail(to, subject, text);    // 調用 emailService 發送郵件
-        return "Email sent successfully✅";           // 返回成功訊息
+        emailService.sendEmail(to, subject, text);
+        return "Email sent successfully✅";
     }
   
     
@@ -216,21 +213,17 @@ public class UsersController {
     public String registerStep3(
         @RequestParam("username") String usernamee,     // 使用usernamee 變數儲存
         @RequestParam("password") String passwordd,     // 使用passwordd 變數儲存
-        @RequestParam("gender") String genderr,         // 使用genderr   變數儲存
         @RequestParam("email") String email
     ) {
 
         JSONObject responseBody = new JSONObject();
 
-        System.out.println("註冊 第三步: 註冊用戶名、密碼、性別===================================");
-        System.out.println("變數儲存用戶名: " + usernamee);    
-        System.out.println("變數儲存密碼(未加密): " + passwordd);    
-        System.out.println("變數儲存性別: " + genderr);        
-        System.out.println("電子信箱: " + email);            
+        System.out.println("註冊 第三步: 註冊 用戶名、密碼 ===================================");
+        System.out.println("  變數儲存用戶名: " + usernamee);    
+        System.out.println("  變數儲存密碼(未加密): " + passwordd);          
+        System.out.println("  電子信箱: " + email);            
 
-        username = usernamee;    // 使用usernamee 變數儲存
-        gender = genderr;        // 使用genderr   變數儲存
-       
+        username = usernamee;    // 使用usernamee 變數儲存      
         password = passwordEncoder.encode(passwordd);    // 將密碼進行加密，並且存入變數 password 中
         System.out.println("系統加密過的密碼= "+encryptedPassword);
 
@@ -239,19 +232,41 @@ public class UsersController {
         return responseBody.toString();
     }
 
-
- // 註冊 第四步:填寫個人資料，傳送資料庫 ===================================================================
+// 註冊 第四步:填寫個人資料，傳送資料庫 ===================================================================
     @PostMapping("/register/step4")
     public String registerStep4(
-        @RequestParam("birth") String birth,
-        @RequestParam("phone") String phone,
+    		@RequestParam("gender") String genderr,        
+    		@RequestParam("birth") String birthh,
+            @RequestParam("phone") String phonee,
+            @RequestParam("email") String email
+     ) {
+    	JSONObject responseBody = new JSONObject();
+    	
+    	gender = genderr;        // 使用genderr   變數儲存
+    	birth = birthh;
+    	phone = phonee;
+    	
+    	System.out.println("註冊 第四步: 註冊 性別、生日、號碼 ===================================");
+        System.out.println("  變數儲存性別: " + genderr);    
+        System.out.println("  變數儲存生日: " + birthh);          
+        System.out.println("  變數儲存號碼: " + phonee);          
+        System.out.println("  電子信箱: " + email);       
+    	
+    	responseBody.put("success", true);
+        responseBody.put("message", "信箱、性別、生日、號碼已儲存到資料庫");
+        return responseBody.toString();
+    	
+    }
+
+ // 註冊 第五步:填寫個人資料，傳送資料庫 ===================================================================
+    @PostMapping("/register/step5")
+    public String registerStep5(
         @RequestParam("address") String address,
-        @RequestParam("filess") MultipartFile avatarFile
-       
+        @RequestParam("filess") MultipartFile avatarFile     
     ) {
         JSONObject responseBody = new JSONObject();
 
-        System.out.println("註冊 第四步: 註冊生日、手機號碼、地址、大頭照========================");
+        System.out.println("註冊 第五步: 註冊所有個資 ========================");
         System.out.println("生日: " + birth);
         System.out.println("手機號碼: " + phone);
         System.out.println("地址: " + address);
@@ -544,3 +559,4 @@ public class UsersController {
     }
 
 }
+  

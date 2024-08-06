@@ -1,6 +1,7 @@
 package com.cloth.Controller;
 
 
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -109,10 +110,10 @@ public class OrderController {
                 productJson.put("size", product.getSize());
                 productJson.put("price", product.getPrice());
                 productJson.put("discount_price", product.getDiscount_price());
-                productJson.put("img", product.getImg());
-                productJson.put("img2", product.getImg2());
-                productJson.put("img3", product.getImg3());
-                productJson.put("img4", product.getImg4());
+                productJson.put("img", Base64.getEncoder().encodeToString(product.getImg()));
+                productJson.put("img2", Base64.getEncoder().encodeToString(product.getImg2()));
+                productJson.put("img3", Base64.getEncoder().encodeToString(product.getImg3()));
+                productJson.put("img4", Base64.getEncoder().encodeToString(product.getImg4()));
                 productJson.put("status", product.getStatus());
                 productJson.put("color", product.getColor());
                 productJson.put("type", product.getType());
