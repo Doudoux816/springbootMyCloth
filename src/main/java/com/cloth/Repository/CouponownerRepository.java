@@ -25,4 +25,9 @@ public interface CouponownerRepository extends JpaRepository<Couponowner, Intege
 
 	@Query("SELECT c FROM Couponowner c WHERE c.id = :id")
 	Optional<Couponowner> findById(@Param("id") Couponowner couponId);
+	
+	// boolean existsByUsersIdAndCouponId(Integer usersId, Integer couponId);
+
+    boolean existsByUsersIdAndCouponId(Integer usersId, Integer couponId);
+
 }

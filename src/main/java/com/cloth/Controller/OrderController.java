@@ -1,6 +1,26 @@
 package com.cloth.Controller;
 
 
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.cloth.Repository.CouponRepository;
+import com.cloth.Repository.OrderDetailRepository;
+import com.cloth.Repository.UsersRepository;
 import com.cloth.model.Cart;
 import com.cloth.model.Coupon;
 import com.cloth.model.Couponowner;
@@ -8,21 +28,9 @@ import com.cloth.model.Orderdetail;
 import com.cloth.model.Orders;
 import com.cloth.model.Product;
 import com.cloth.model.Users;
-import com.cloth.Repository.CouponRepository;
-import com.cloth.Repository.OrderDetailRepository;
-import com.cloth.Repository.UsersRepository;
 import com.cloth.service.CouponService;
+import com.cloth.service.CouponownerService;
 import com.cloth.service.OrderService;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/orders")
@@ -42,19 +50,24 @@ public class OrderController {
     private CouponService couponService;
     
     @Autowired
+    private CouponownerService couponownerService;
+    
+    @Autowired
     private CouponRepository couponownerRepository;
-   
+    
+
 //用單號找訂單資訊
     @GetMapping("/detail/{Id}")
     public ResponseEntity<String> getOrderById(@PathVariable Integer Id) {
-    	List<Orders> orders = orderService.findOrderById(Id);
-    	
-    	// JSON 響應
+        List<Orders> orders = orderService.findOrderById(Id);
+
+        // 用於儲存最終的 JSON 結果
         JSONArray responseArray = new JSONArray();
+
         for (Orders order : orders) {
             JSONObject orderJson = new JSONObject();
             orderJson.put("id", order.getId());
-            orderJson.put("orderDate", order.getCreated_at());
+            orderJson.put("orderDate", order.getCreated_at().toString());
             orderJson.put("status", order.getStatus());
             orderJson.put("totalAmount", order.getTotalAmount());
             orderJson.put("recipientName", order.getShipname());
@@ -63,7 +76,6 @@ public class OrderController {
             orderJson.put("address", order.getShipaddress());
             orderJson.put("paymentMethod", order.getPayment());
             orderJson.put("ordernum", order.getOrdernum());
-            
 
             // 訂單詳細信息
             JSONArray orderDetailsArray = new JSONArray();
@@ -74,6 +86,17 @@ public class OrderController {
                 orderDetailJson.put("order_id", orderDetail.getOrders());
                 orderDetailJson.put("return_id", orderDetail.getReturns());
 
+                // 處理優惠券信息
+                if (order.getCouponowner() != null) {
+                    JSONObject couponownerJson = new JSONObject();
+                    couponownerJson.put("couponId", order.getCouponowner().getCoupon().getId());
+
+                    JSONObject couponJson = new JSONObject();
+                    couponJson.put("discount", order.getCouponowner().getCoupon().getDiscount());
+
+                    couponownerJson.put("coupon", couponJson);
+                    orderJson.put("couponowner", couponownerJson);
+                }
 
                 // 商品信息
                 Product product = orderDetail.getCart().getProduct();
@@ -97,6 +120,20 @@ public class OrderController {
                 productJson.put("style", product.getStyle());
 
                 orderDetailJson.put("product", productJson);
+
+                // Cart 信息
+                Cart cart = orderDetail.getCart();
+                JSONObject cartJson = new JSONObject();
+                cartJson.put("id", cart.getId());
+                cartJson.put("users_id", cart.getUsers().getId());
+                cartJson.put("product_id", cart.getProduct());
+                cartJson.put("status", cart.getStatus());
+                cartJson.put("subtotal", cart.getSubtotal());
+                cartJson.put("quantity", cart.getQuantity());
+                cartJson.put("created_at", cart.getCreated_at().toString());
+                cartJson.put("updated_at", cart.getUpdated_at().toString());
+
+                orderDetailJson.put("cart", cartJson);
                 orderDetailsArray.put(orderDetailJson);
             }
             orderJson.put("orderDetails", orderDetailsArray);
@@ -127,6 +164,20 @@ public class OrderController {
             orderJson.put("address", order.getShipaddress());
             orderJson.put("paymentMethod", order.getPayment());
             orderJson.put("ordernum", order.getOrdernum());
+            orderJson.put("couponownerId", order.getCouponowner());
+            
+            Couponowner couponowner = order.getCouponowner();
+            if (couponowner != null) {
+                JSONObject couponownerJson = new JSONObject();
+                couponownerJson.put("couponId", couponowner.getCoupon().getId());
+
+                //Coupon coupon = couponowner;
+                JSONObject couponJson = new JSONObject();
+                couponJson.put("discount", couponowner.getCoupon().getDiscount());
+
+                couponownerJson.put("coupon", couponJson);
+                orderJson.put("couponowner", couponownerJson);
+            }
             
 
             // 訂單詳細信息
@@ -334,124 +385,5 @@ public class OrderController {
             this.totalAmount = totalAmount;
         }
     }
-  
-//    @PostMapping
-//    public ResponseEntity<Orders> createOrder(@RequestBody Map<String, Object> orderData) {
-//        Orders order = new Orders();
-//
-//        // 设置订单用户信息
-//        Integer userId = (Integer) orderData.get("userId");
-//        Users user = new Users();
-//        user.setId(userId);
-//        order.setUsers(user);
-//
-//        // 设置折扣券信息
-//        Map<String, Object> selectedCoupon = (Map<String, Object>) orderData.get("selectedCoupon");
-//        if (selectedCoupon != null) {
-//            Map<String, Object> owner = (Map<String, Object>) selectedCoupon.get("owner");
-//            if (owner != null) {
-//                Integer ownerId = (Integer) owner.get("owner_Id");
-//                Couponowner couponOwner = new Couponowner();
-//                couponOwner.setId(ownerId);
-//                order.setCouponowner(couponOwner);
-//            }
-//        }
-//
-//        // 设置其他订单信息
-//        order.setShip_address((String) orderData.get("address"));
-//        order.setShipping((String) orderData.get("shippingMethod"));
-//        order.setPay((String) orderData.get("paymentMethod"));
-//
-//        // 安全转换 totalAmount
-//        Object totalAmountObj = orderData.get("totalAmount");
-//        if (totalAmountObj instanceof Number) {
-//            order.setTotalAmount(((Number) totalAmountObj).intValue());
-//        } else if (totalAmountObj instanceof String) {
-//            try {
-//                order.setTotalAmount(Integer.parseInt((String) totalAmountObj));
-//            } catch (NumberFormatException e) {
-//                return ResponseEntity.badRequest().body(null);
-//            }
-//        } else {
-//            return ResponseEntity.badRequest().body(null);
-//        }
-//
-//        // 设置订单详细信息
-//        List<Map<String, Object>> selectedItems = (List<Map<String, Object>>) orderData.get("selectedItems");
-//        for (Map<String, Object> itemData : selectedItems) {
-//            Orderdetail orderDetail = new Orderdetail();
-//
-//            // 安全转换 productId
-//            Object productIdObj = itemData.get("productId");
-//            if (productIdObj instanceof Number) {
-//                orderDetail.setProductId(((Number) productIdObj).intValue());
-//            } else if (productIdObj instanceof String) {
-//                try {
-//                    orderDetail.setProductId(Integer.parseInt((String) productIdObj));
-//                } catch (NumberFormatException e) {
-//                    return ResponseEntity.badRequest().body(null);
-//                }
-//            } else {
-//                return ResponseEntity.badRequest().body(null);
-//            }
-//
-//            // 安全转换 quantity
-//            Object quantityObj = itemData.get("quantity");
-//            if (quantityObj instanceof Number) {
-//                orderDetail.setQuantity(((Number) quantityObj).intValue());
-//            } else if (quantityObj instanceof String) {
-//                try {
-//                    orderDetail.setQuantity(Integer.parseInt((String) quantityObj));
-//                } catch (NumberFormatException e) {
-//                    return ResponseEntity.badRequest().body(null);
-//                }
-//            } else {
-//                return ResponseEntity.badRequest().body(null);
-//            }
-//
-//            // 安全转换 price
-//            Object priceObj = itemData.get("price");
-//            if (priceObj instanceof Number) {
-//                orderDetail.setPrice(((Number) priceObj).doubleValue());
-//            } else if (priceObj instanceof String) {
-//                try {
-//                    orderDetail.setPrice(Double.parseDouble((String) priceObj));
-//                } catch (NumberFormatException e) {
-//                    return ResponseEntity.badRequest().body(null);
-//                }
-//            } else {
-//                return ResponseEntity.badRequest().body(null);
-//            }
-//
-//            // 安全转换 discountPrice
-//            Object discountPriceObj = itemData.get("discountPrice");
-//            if (discountPriceObj instanceof Number) {
-//                orderDetail.setDiscountPrice(((Number) discountPriceObj).doubleValue());
-//            } else if (discountPriceObj instanceof String) {
-//                try {
-//                    orderDetail.setDiscountPrice(Double.parseDouble((String) discountPriceObj));
-//                } catch (NumberFormatException e) {
-//                    return ResponseEntity.badRequest().body(null);
-//                }
-//            } else {
-//                return ResponseEntity.badRequest().body(null);
-//            }
-//
-//            order.getOrderdetail().add(orderDetail);
-//        }
-//
-//        // 设置订单状态和时间
-//        order.setStatus("Pending");
-//        order.setCreated_at(new Date());
-//        order.setUpdated_at(new Date());
-//
-//        // 保存订单
-//        Orders savedOrder = orderService.saveOrder(order);
-//
-//        return ResponseEntity.ok(savedOrder);
-//    }
-    
-    
 
-    
 }

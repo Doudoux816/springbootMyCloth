@@ -35,7 +35,7 @@ public class Couponowner {
 	@JoinColumn(name = "users_id")
 	private Users users;
 	
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "coupon_id")
 	private Coupon coupon;
 	
@@ -50,7 +50,7 @@ public class Couponowner {
 	@Temporal(TemporalType.TIMESTAMP) 
 	private Date end_at;
 	
-	@OneToMany(mappedBy = "couponowner", fetch = FetchType.LAZY)
+	@OneToMany(mappedBy = "couponowner", fetch = FetchType.EAGER)
 	private List<Orders> orders = new ArrayList<>();
 	
 	

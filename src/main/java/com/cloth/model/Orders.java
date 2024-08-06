@@ -46,12 +46,12 @@ public class Orders {
 	private String shipment; // 配送方式
 	
 	private String Ordernum;
-	private String totalAmount; // 配送方式
+	private String totalAmount; 
 
-	@OneToMany(mappedBy = "orders", fetch = FetchType.LAZY)
+	@OneToMany(mappedBy = "orders", fetch = FetchType.EAGER)
 	private List<Orderdetail> Orderdetail = new ArrayList<>();
 
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "couponowner_id")
 	private Couponowner couponowner;
 

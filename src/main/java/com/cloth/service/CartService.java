@@ -60,30 +60,26 @@ public class CartService {
         }
     }
     
-
+//查找購物車
     public Cart updateCartItemQuantity(Integer cartId, Integer quantity) {
-        // 查找购物车项
         Optional<Cart> optionalCart = cartRepository.findById(cartId);
         if (optionalCart.isPresent()) {
             Cart cartItem = optionalCart.get();
             
-            // 获取商品 ID
+            //取得商品ID
             Integer productId = cartItem.getProduct().getId();
             if (productId != null) {
-                // 通过 ProductRepository 获取 Product 实体
                 Optional<Product> optionalProduct = productRepository.findById(productId);
                 if (optionalProduct.isPresent()) {
                     Product product = optionalProduct.get();
-                    Integer discount_price = product.getDiscount_price(); // 从 Product 对象获取价格
+                    Integer discount_price = product.getDiscount_price(); 
                     
-                    // 计算小计
                     Integer subtotal = discount_price * quantity;
 
-                    // 更新购物车项
                     cartItem.setQuantity(quantity);
-                    cartItem.setSubtotal(subtotal); // 设置小计
-                    cartItem.setUpdated_at(new Date()); // 设置更新时间
-
+                    cartItem.setSubtotal(subtotal);
+                    cartItem.setUpdated_at(new Date());
+                    
                     return cartRepository.save(cartItem);
                 } else {
                     throw new RuntimeException("Product not found with id: " + productId);

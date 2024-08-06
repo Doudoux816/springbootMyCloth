@@ -1,16 +1,20 @@
 package com.cloth.Controller;
 
-import com.cloth.model.Couponowner;
-import com.cloth.service.CouponownerService;
+import java.util.List;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
+import com.cloth.service.CouponownerService;
 
 @RestController
 @RequestMapping("/api/couponowner")
@@ -25,27 +29,7 @@ public class CouponownerController {
         this.couponownerService = couponownerService;
     }
 
-//    @GetMapping("/user/coupons/{userId}")
-//    public ResponseEntity<String> getCouponsByUserId(@PathVariable Integer userId) {
-//        List<Couponowner> coupons = couponownerService.findCouponsByUserId(userId);
-//
-//        JSONArray responseArray = new JSONArray();
-//        for (Couponowner couponowner : coupons) {
-//            JSONObject couponJson = new JSONObject();
-//            couponJson.put("id", couponowner.getId());
-//            couponJson.put("status", couponowner.getStatus());
-//            couponJson.put("start_at", couponowner.getStart_at());
-//            couponJson.put("end_at", couponowner.getEnd_at());
-//
-//            couponJson.put("coupon", couponJson);
-//
-//            responseArray.put(couponJson);
-//        }
-//
-//        return ResponseEntity.ok(responseArray.toString());
-//    }
-
-    @PostMapping("/user/{userId}/addCoupon")
+    @PostMapping("/user/{userId}")
     public String addCouponForUser(@PathVariable Integer userId, @RequestBody String jsonBody) {
         JSONObject jsonObject = new JSONObject(jsonBody);
         // 根據前端發送的 JSON 數據進行相應處理，例如解析後添加到用戶的優惠券列表中
@@ -68,9 +52,6 @@ public class CouponownerController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
-//    @PutMapping("/status")
-//    public void updateCouponStatus(@RequestBody List<Integer> ids) {
-//    	couponownerService.updateCouponStatusToZero(ids);
-//    }
+
 }
 

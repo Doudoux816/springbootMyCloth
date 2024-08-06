@@ -13,7 +13,6 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.propertyeditors.CustomNumberEditor;
-import org.springframework.boot.autoconfigure.security.SecurityProperties.User;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
@@ -28,7 +27,7 @@ import java.util.Optional;
 @CrossOrigin
 public class CartController {
 	
-    @Autowired
+	@Autowired
     private final CartService cartService;
     
     @Autowired
@@ -48,7 +47,6 @@ public class CartController {
     public void initBinder(WebDataBinder binder) {
         binder.registerCustomEditor(Integer.class, new CustomNumberEditor(Integer.class, true));
     }
-    
     
  // 用會員id找購物車
     @GetMapping("/user/{userId}")
@@ -142,7 +140,7 @@ public class CartController {
         cartService.updateCartStatusToOne(ids);
     }
     
-    //新增商品進購物車
+  //新增商品進購物車
     @PostMapping("/add")
     public ResponseEntity<?> addToCart(@RequestBody CartItemDto cartItemDto) {
         Optional<Product> productOptional = productRepository.findById(cartItemDto.getProductId());
@@ -173,8 +171,6 @@ public class CartController {
 
         return ResponseEntity.ok(savedCart);
     }
-
-    
     
     //新增商品進購物車
 //    @PostMapping("/add")
